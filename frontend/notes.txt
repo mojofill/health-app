@@ -1,0 +1,14 @@
+/<username> <- this is the profile page for the user
+
+For specific health components - could either be a bunch of pre defined health components
+EG - diet, fitness, mental, cancer, blood - compile a whole list of all the possible stuff
+
+    CONS - places an expectation on the user to finish all of these, while it is possible for the app to just give an abbreviated model
+    PROS - there are none
+
+Oh.
+What you could do is, in the server side, have a list of constants that detail the parts of health that is available.
+On client side, have a bunch of cards that are mapped from the list of health aspects that the user has that the server gives to the client.
+Client can click on the cards to reveal more information on each aspect.
+
+I think you would have to create a file for each and every aspect of health to predict the person's future health status for <int> years later.
