@@ -1,88 +1,76 @@
-import {Router} from 'express';
+import { Router } from 'express';
 import authenticate from '../../middlewares/authenticate';
 import User from '../../entities/User.entity';
 import UserInformation from '../../entities/UserInformation.entity';
 import { UserInformationWebJson } from '../../entities/UserInformation.entity';
-import CalculateRouter from './calculate/calculate.router';
 
-const UserRouter = Router(); 
+const UserRouter = Router();
 
 UserRouter.use(authenticate);
 
 UserRouter.get('/isAuthenticated', async (req, res) => {
-    res.status(200).end(); 
-})
+  res.status(200).end();
+});
 
 export const getUserById = async (id: number, scope: string[] = []) => {
-    return User.findOne({
-        where: {
-            id
-        }, 
-        relations: scope
-    })
-}
-
-
+  return User.findOne({
+    where: {
+      id,
+    },
+    relations: scope,
+  });
+};
 
 UserRouter.get('/me', async (req, res) => {
-    console.log(req.userId);
-    
-    const scope = req.query.scope as string ?? ''; 
-    const user = await getUserById(req.userId, scope.split(',').filter(e => e !== ''));
+  const scope = (req.query.scope as string) ?? '';
+  const user = await getUserById(
+    req.userId,
+    scope.split(',').filter((e) => e !== '')
+  );
 
-    console.log(user);
-    
-    if (!user) return res.status(404).send({error: "Invalid user"}).end(); 
+  console.log(user);
 
-    // user.isSetUp = false; 
-    // await user.save(); 
+  if (!user) return res.status(404).send({ error: 'Invalid user' }).end();
 
-
-    
-
-    res.send(user.toWebJson()); 
-}); 
+  res.send(user.toWebJson());
+});
 
 UserRouter.get('/userinfo', async (req, res) => {
-    const user = await getUserById(req.userId, ['userInformation']); 
+  const user = await getUserById(req.userId, ['userInformation']);
 
-    if (!user) return res.status(404).send({error: "Invalid user"}).end(); 
+  if (!user) return res.status(404).send({ error: 'Invalid user' }).end();
 
-    res.status(200).send(user.userInformation.toWebJson()); 
-}); 
+  res.status(200).send(user.userInformation.toWebJson());
+});
 
 UserRouter.post('/updateUser', async (req, res) => {
-    const user = await getUserById(req.userId, ['userInformation']); 
-    const updates: UserInformationWebJson = req.body.updates ?? {}; 
-    
-    if (!user) return res.status(404).send({error: "Invalid user"}).end();
-    
-    const info = await UserInformation.findOne({
-        where: {
-            id: user?.userInformation.id
-        }
-    }); 
+  const user = await getUserById(req.userId, ['userInformation']);
+  const updates: UserInformationWebJson = req.body.updates ?? {};
 
-    for (const k of Object.keys(updates)) {
-        const key = k as keyof UserInformationWebJson; 
-        const v = updates[key]; 
-        // @ts-ignore
-        info[key] = updates[key]; 
-    }
+  if (!user) return res.status(404).send({ error: 'Invalid user' }).end();
 
-    user.isSetUp = true; 
+  const info = await UserInformation.findOne({
+    where: {
+      id: user?.userInformation.id,
+    },
+  });
 
-    await info?.save(); 
-    await user.save(); 
+  if (!info) return res.status(404).send({ error: 'Invalid user information' }).end();
 
-    const u1 = await getUserById(req.userId, ['userInformation']); 
-    console.log('post-save');
-    console.log(u1);
+  for (const k of Object.keys(updates)) {
+    const key = k as keyof UserInformationWebJson;
+    if (!(key in info)) continue;
+    const v = updates[key];
+    // @ts-ignore
+    info[key] = updates[key];
+  }
 
-    res.status(200).end();     
-})
+  user.isSetUp = true;
 
-UserRouter.use('/calculate', CalculateRouter); 
+  await info.save();
+  await user.save();
 
+  res.status(200).end();
+});
 
-export default UserRouter; 
+export default UserRouter;

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 function CreateExerciseRoutine() {
-    return (<div></div>)
+  return <div></div>;
 }
 
 export default CreateExerciseRoutine;

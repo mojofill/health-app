@@ -1,4 +1,4 @@
 export const parsePort = (port: any) => {
-    if (port === undefined) return 3000; 
-    return isNaN(parseInt(port)) ? 3000 : parseInt(port); 
-}; 
+  if (port === undefined) return 1000;
+  return isNaN(parseInt(port)) ? 1000 : parseInt(port);
+};
